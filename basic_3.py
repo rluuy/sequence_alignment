@@ -1,4 +1,7 @@
 import sys
+from resource import *
+import time
+import psutil
 
 
 MISMATCH_DICT = {
@@ -30,6 +33,21 @@ ex) ACTG 3  --> ACTGACTG
 def input_string_generator(s,n):
     return s[:n + 1] + s + s[n + 1:]
 
+
+def process_memory():
+    process = psutil.Process()
+    memory_info = process.memory_info()
+    memory_consumed = int(memory_info.rss/1024)
+    return memory_consumed
+
+def time_wrapper(s1, s2):
+    start_time = time.time()
+    algorithm_info = find_sequence_alignment_nw_algo(s1, s2)
+    end_time = time.time()
+    time_taken = (end_time - start_time) * 1000
+    return algorithm_info + "\n" + str(time_taken)
+
+
 '''
  Sequence Alignment Problem using Needleman-wunsch algorithm as basis
 '''
@@ -44,6 +62,7 @@ def find_sequence_alignment_nw_algo(s1, s2):
     # -1  0  0  0
     # -2  0  0  0
     # -3  0  0  0
+
 
     scoring_matrix = [
         [0 if x == 0 and y == 0 else x * GAP_PENALTY if y == 0 else y * GAP_PENALTY if x == 0 else 0 for x in
@@ -93,13 +112,12 @@ def find_sequence_alignment_nw_algo(s1, s2):
 
     new_s1 = ''.join(new_s1)[::-1]
     new_s2 = ''.join(new_s2)[::-1]
-    print(new_s1)
-    print(new_s2)
-    print(max_alignment_score)
 
+    #print(new_s1)
+    #print(new_s2)
+    #print(max_alignment_score)
 
-
-
+    return str(max_alignment_score) + "\n" + new_s1 + "\n" + new_s2
 
 
 if __name__ == '__main__':
@@ -138,8 +156,15 @@ if __name__ == '__main__':
     assert len(s1) == (2**len(s1_copy_instructions)) * s1_og_len , "Length of S1 is not correct. Oh no"
     assert (len(s2) == (2 ** len(s2_copy_instructions)) * s2_og_len),  "Length of S2 is not correct. Oh no"
 
+    algo_and_time_str = time_wrapper(s1,s2)
+    memory_useage_str = process_memory()
+
+    final_output_str = (algo_and_time_str + "\n" + str(memory_useage_str))
+    print(final_output_str)
+    with open(output_file_path, 'w') as f:
+        f.writelines(final_output_str)
     #print(s1)
     #print(s2)
-    find_sequence_alignment_nw_algo(s1,s2)
-
+    #algorithm_info = find_sequence_alignment_nw_algo(s1,s2)
+    #print(algorithm_info)
 
